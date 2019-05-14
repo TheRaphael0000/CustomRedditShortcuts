@@ -1,32 +1,79 @@
-(function() {
-	function customScroll(i)
+/* if first call, initialize things */
+if(customShortcuts == undefined)
+{
+	console.log("initialize");
+	/* var to be accessible outside this if */
+	var customShortcuts = false;
+	/* TODO : find a way to get the root element */
+	var root_feed_node = document.getElementsByClassName("rpBJOHq2PR60pnwJlUyP0")[0];
+	
+	var scrollIndex = 0;
+	
+	var enableCustomShortcuts = function (e)
 	{
-		let root = document.getElementsByClassName("rpBJOHq2PR60pnwJlUyP0")[0]; /* TODO : find a way to get the root element */
-		let children = root.children;
-		do
-		{
-			let nextI = customScroll.i + i;
-			if(nextI < 0 || nextI >= children.length)
-				return;
-			customScroll.i = nextI;
-		}
-		while(children[customScroll.i].offsetHeight < 3.14159265) /* adblocker issue, sorry i'm evil */
-		let nextChild = children[customScroll.i];
-		for(let child of children)
-			child.style.opacity = 0.2;
-		nextChild.style.opacity = 1;
-		nextChild.scrollIntoView();
-		let centering = (window.innerHeight - nextChild.offsetHeight) / 2;
-		window.scrollTo(0, window.scrollY - centering);
-	}
-
-	customScroll.i = 0;
-
-	document.addEventListener("keypress", function kp(e) {
 		if(e.key == "j")
 			customScroll(1);
 		else if(e.key == "k")
 			customScroll(-1);
 		e.stopPropagation(); /* to stop using the other keypress events*/
-	}, true);
-})();
+	}
+}
+
+function findCurrentScrollIndex()
+{
+	let minIndex = 0;
+	let min = Infinity;
+	for(let i = 0; i < root_feed_node.children.length; i++)
+	{
+		child = root_feed_node.children[i];
+		let bdr = child.getBoundingClientRect();
+		let y = Math.abs(bdr.y - bdr.height / 2);
+		if(y < min)
+		{
+			min = y;
+			minIndex = i;
+		}
+	}
+	return minIndex;
+}
+
+function customScroll(i)
+{
+	let children = root_feed_node.children;
+	let cpt = 0;
+	do
+	{
+		let nextI = scrollIndex + i;
+		if(nextI < 0 || nextI >= children.length)
+			return;
+		scrollIndex = nextI;
+		cpt++;
+	}
+	while(children[scrollIndex].offsetHeight < 3.14159265 && cpt < 10) /* adblocker issue, sorry i'm evil */
+	
+	let nextChild = children[scrollIndex];
+	
+	for(let child of children)
+		child.style.opacity = 0.2;
+	nextChild.style.opacity = 1;
+	
+	nextChild.scrollIntoView();
+	let centering = (window.innerHeight - nextChild.offsetHeight) / 2;
+	window.scrollTo(0, window.scrollY - centering);
+}
+
+/* Enable it */
+if(customShortcuts == false)
+{
+	document.addEventListener("keypress", enableCustomShortcuts);
+	scrollIndex = findCurrentScrollIndex();
+	customScroll(0);
+}
+else
+{
+	document.removeEventListener("keypress", enableCustomShortcuts);
+	for(let child of root_feed_node.children)
+		child.style.opacity = 1;
+}
+
+customShortcuts = !customShortcuts;
