@@ -65,13 +65,13 @@ function customScroll(i)
 /* Enable it */
 if(customShortcuts == false)
 {
-	document.addEventListener("keypress", enableCustomShortcuts);
+	document.addEventListener("keypress", enableCustomShortcuts, true);
 	scrollIndex = findCurrentScrollIndex();
 	customScroll(0);
 }
 else
 {
-	document.removeEventListener("keypress", enableCustomShortcuts);
+	document.removeEventListener("keypress", enableCustomShortcuts, true);
 	for(let child of root_feed_node.children)
 		child.style.opacity = 1;
 }
